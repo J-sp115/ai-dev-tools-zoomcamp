@@ -1,0 +1,61 @@
+{% extends 'todo/base.html' %}
+
+{% block title %}To-Do — Home{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form action="{% if editing %}{% url 'todo:edit_task' editing_id %}{% else %}{% url 'todo:add_task' %}{% endif %}" method="post" class="task-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-row">
+            {{ form.title.errors }}
+            {{ form.title }}
+        </div>
+        <div class="form-row">
+            {{ form.description.errors }}
+            {{ form.description }}
+        </div>
+        <div class="form-row small">
+            {{ form.due_date.errors }}
+            {{ form.due_date }}
+        </div>
+        <div class="form-row">
+            <button type="submit">{% if editing %}Save changes{% else %}Add task{% endif %}</button>
+            {% if editing %}
+                <a href="{% url 'todo:index' %}" class="button secondary">Cancel</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    {% if tasks %}
+        <ul class="task-list">
+            {% for task in tasks %}
+                <li class="task {% if task.completed %}completed{% endif %}">
+                    <div class="task-left">
+                        <a href="{% url 'todo:toggle_task' task.id %}" title="Toggle completed" class="toggle">
+                            {% if task.completed %}✔{% else %}◻{% endif %}
+                        </a>
+                        <div class="task-meta">
+                            <strong class="task-title">{{ task.title }}</strong>
+                            {% if task.due_date %}
+                                <span class="due">due {{ task.due_date }}</span>
+                            {% endif %}
+                            {% if task.description %}
+                                <div class="desc">{{ task.description|linebreaksbr }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <a href="{% url 'todo:edit_task' task.id %}">Edit</a>
+                        <a href="{% url 'todo:delete_task' task.id %}" class="delete" onclick="return confirm('Delete this task?');">Delete</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tasks yet — add one above!</p>
+    {% endif %}
+</div>
+{% endblock %}
